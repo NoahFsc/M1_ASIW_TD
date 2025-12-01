@@ -30,13 +30,12 @@ const saveParcours = () => {
     return; 
   } 
 
-  console.log('Saving parcours:', currentParcours.value);
+  console.log('Parcours sauvegardé :', currentParcours.value);
 
-  // TODO : régler côté back le retour pour avoir les champs en pascal case au lieu de camel case
   if (currentParcours.value.ID) { 
-    ParcoursDAO.getInstance().update(currentParcours.value.ID, currentParcours.value).then((newParcours) => { 
+    ParcoursDAO.getInstance().update(currentParcours.value.ID, currentParcours.value).then(() => { 
       alert('Parcours mis à jour avec succès');
-      emit('update:parcours', newParcours);
+      emit('update:parcours', structuredClone(toRaw(currentParcours.value))); // Comme mon API renvoie une 204, copier le content pour mettre à jour automatiquement dans l'affichage du tableau
       closeForm(); 
     }).catch((ex) => { 
       alert(ex.message); 
