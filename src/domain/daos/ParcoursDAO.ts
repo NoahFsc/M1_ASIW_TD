@@ -1,6 +1,7 @@
 import type { Parcours } from '../entities/Parcours';
 import type { IDAO } from './IDAO';
 import apiClient from '../config/axiosConfig';
+import { getErrorMessage } from '../utils/errorHelper';
 
 export class ParcoursDAO implements IDAO<Parcours> {
     private static instance: ParcoursDAO;
@@ -19,7 +20,7 @@ export class ParcoursDAO implements IDAO<Parcours> {
             const response = await apiClient.post('/api/Parcours', data);
             return response.data;
         } catch (error) {
-            throw new Error('Impossible de créer le nouveau parcours');
+            throw new Error(getErrorMessage(error, 'Impossible de créer le nouveau parcours'));
         }
     }
 
@@ -28,7 +29,7 @@ export class ParcoursDAO implements IDAO<Parcours> {
             const response = await apiClient.get(`/api/Parcours/${id}`);
             return response.data;
         } catch (error) {
-            throw new Error('Impossible de récupérer le parcours');
+            throw new Error(getErrorMessage(error, 'Impossible de récupérer le parcours'));
         }
     }
 
@@ -37,7 +38,7 @@ export class ParcoursDAO implements IDAO<Parcours> {
             const response = await apiClient.put(`/api/Parcours/${id}`, data);
             return response.data;
         } catch (error) {
-            throw new Error('Impossible de mettre à jour le parcours');
+            throw new Error(getErrorMessage(error, 'Impossible de mettre à jour le parcours'));
         }
     }
 
@@ -45,17 +46,16 @@ export class ParcoursDAO implements IDAO<Parcours> {
         try {
             await apiClient.delete(`/api/Parcours/${id}`);
         } catch (error) {
-            throw new Error('Impossible de supprimer le parcours');
+            throw new Error(getErrorMessage(error, 'Impossible de supprimer le parcours'));
         }
     }
 
     public async list(): Promise<Parcours[]> {
         try {
             const response = await apiClient.get('/api/Parcours');
-            console.log(response.data);
             return response.data;
         } catch (error) {
-            throw new Error('Impossible de récupérer la liste des parcours');
+            throw new Error(getErrorMessage(error, 'Impossible de récupérer la liste des parcours'));
         }
     }
-} 
+}

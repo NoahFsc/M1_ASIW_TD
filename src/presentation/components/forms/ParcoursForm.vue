@@ -4,6 +4,7 @@ import { BootstrapButtonEnum } from '@/types/BootstrapButtonEnum';
 import { Parcours } from '@/domain/entities/Parcours';
 import CustomInput from '@/presentation/components/forms/components/CustomInput.vue';
 import CustomButton from '@/presentation/components/forms/components/CustomButton.vue';
+import CustomModal from '@/presentation/components/modals/CustomModal.vue'; 
 import { ParcoursDAO } from '@/domain/daos/ParcoursDAO';
 
 const currentParcours = ref<Parcours>(new Parcours(null, null, null));
@@ -99,60 +100,33 @@ watch(() => currentParcours.value.AnneeFormation, () => {
 });
 </script>
 
-<template>
-    <div v-if="isOpen" class="custom-modal">
-        <div class="card new-parcours">
-            <div class="card-header" style="background: #273656">
-                <template v-if="parcours && parcours.ID"> Modification du parcours </template>
-                <template v-else> Nouveau parcours </template>
-            </div>
-            <div class="card-body">
-                <div class="card-text mt-1 mb-1">
-                    <form>
-                        <CustomInput v-model="currentParcours.NomParcours" id="intitule" libelle="Intitulé" type="text" 
-                            placeholder="Intitulé du parcours" :error="formErrors.NomParcours" /> 
-                        <CustomInput v-model="currentParcours.AnneeFormation" class="mt-2" id="annee" libelle="Année" type="number"
-                            placeholder="Année de formation" :error="formErrors.AnneeFormation" />
-                    </form>
-                </div>
-                <CustomButton class="mt-1" style="margin-left: 5px" :color="BootstrapButtonEnum.danger"
-                    @click="closeForm">
-                    Annuler
-                </CustomButton>
-                <CustomButton class="mt-1" style="margin-left: 5px" :color="BootstrapButtonEnum.primary"
-                    @click="saveParcours">
-                    Enregistrer
-                </CustomButton>
-            </div>
-        </div>
-    </div>
-</template>
+<template> 
+  <CustomModal :isOpen="isOpen"> 
+    <template v-slot:title> 
+      <template v-if="parcours && parcours.ID"> Modification du parcours </template> 
+      <template v-else> Nouveau parcours </template> 
+    </template>
+
+    <template v-slot:body> 
+      <div class="text-start mt-1 mb-1"> 
+        <form> 
+          <CustomInput v-model="currentParcours.NomParcours" id="intitule" libelle="Intitulé" type="text" 
+            placeholder="Intitulé du parcours" :error="formErrors.NomParcours" /> 
+          <CustomInput v-model="currentParcours.AnneeFormation" class="mt-2" id="annee" libelle="Année" type="number" 
+            placeholder="Année de formation" :error="formErrors.AnneeFormation" /> 
+        </form> 
+      </div> 
+      <CustomButton class="mt-1" style="margin-left: 5px" :color="BootstrapButtonEnum.danger" @click="closeForm"> 
+        Annuler 
+      </CustomButton> 
+      <CustomButton class="mt-1" style="margin-left: 5px" :color="BootstrapButtonEnum.primary" @click="saveParcours"> 
+        Enregistrer 
+      </CustomButton> 
+    </template> 
+  </CustomModal> 
+</template> 
 
 <style scoped> 
-.custom-modal { 
-  position: absolute; 
-  left: 0; 
-  top: 0; 
-  height: 100%; 
-  width: 100%; 
-  background-color: rgba(87, 86, 86, 0.5); 
-  display: flex; 
-  flex-direction: column; 
-  align-items: center; 
-  justify-content: center; 
-  text-align: center; 
-} 
-
-.custom-modal .card { 
-  width: 250px; 
-} 
-
-.card-header { 
-  background: #273656; 
-  color: white; 
-  text-align: left; 
-} 
-
 .card-text { 
   text-align: left; 
 } 

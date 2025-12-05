@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { RouterView } from 'vue-router'
-import NavBar from './presentation/components/navigation/NavBar.vue'
+import Sidebar from './presentation/components/navigation/Sidebar.vue'
 </script>
 
 <template>
   <main>
     <div class="application d-flex flex-nowrap">
-      <NavBar />
+      <Sidebar />
       <RouterView class="content" />
     </div>
   </main>

@@ -1,18 +1,25 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, computed } from 'vue';
 import Swal from 'sweetalert2';
-import { BootstrapButtonEnum } from '@/types/BootstrapButtonEnum';
-import CustomButton from '@/presentation/components/forms/components/CustomButton.vue';
 import ParcoursForm from '@/presentation/components/forms/ParcoursForm.vue';
-import CustomTable from '../components/tables/CustomTable.vue';
 import { Parcours } from '@/domain/entities/Parcours';
 import { ParcoursDAO } from '@/domain/daos/ParcoursDAO';
 
 const parcoursForm = ref<typeof ParcoursForm | null>(null);
 const parcours = ref<Parcours[]>([]);
+const searchQuery = ref('');
+
+const filteredParcours = computed(() => {
+    if (!searchQuery.value) return parcours.value;
+    const query = searchQuery.value.toLowerCase();
+    return parcours.value.filter(p => 
+        p.NomParcours?.toLowerCase().includes(query) ||
+        p.AnneeFormation?.toString().includes(query)
+    );
+});
 
 const onParcoursCreated = (newParcours: Parcours) => { 
-  parcours.value.unshift(newParcours); 
+    parcours.value.unshift(newParcours); 
 };
 
 const onParcoursUpdated = (updatedParcours: Parcours) => { 
@@ -23,37 +30,28 @@ const onParcoursUpdated = (updatedParcours: Parcours) => {
 };
 
 const onDeleteParcours = (p: Parcours) => {
-  Swal.fire({ 
-    title: 'Êtes-vous sûr de vouloir supprimer ce parcours ?', 
-    showCancelButton: true, 
-    confirmButtonText: 'Supprimer', 
-    cancelButtonText: 'Annuler', 
-  }).then((result) => { 
-    if (result.isConfirmed) { 
-      ParcoursDAO.getInstance().delete(p.ID!).then(() => { 
-        parcours.value = parcours.value.filter((parcours) => parcours.ID !== p.ID); 
-      }).catch(() => { 
-        alert('Une erreur est survenue lors de la suppression du parcours'); 
-      }); 
-    } 
-  }) 
-} 
-
-const formatterEdition = (parcours: Parcours) => {
-    return '<i class="bi bi-pen-fill text-primary"></i>';
+    Swal.fire({ 
+        title: 'Supprimer ce parcours ?', 
+        text: `Voulez-vous vraiment supprimer "${p.NomParcours}" ?`,
+        icon: 'warning',
+        showCancelButton: true, 
+        confirmButtonText: 'Supprimer', 
+        cancelButtonText: 'Annuler',
+        confirmButtonColor: '#dc3545',
+    }).then((result) => { 
+        if (result.isConfirmed) { 
+            ParcoursDAO.getInstance().delete(p.ID!).then(() => { 
+                parcours.value = parcours.value.filter((parcours) => parcours.ID !== p.ID); 
+            }).catch((ex) => { 
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Erreur',
+                    text: ex.message,
+                });
+            }); 
+        } 
+    }); 
 };
-
-const formatterSuppression = (parcours: Parcours) => {
-    return '<i class="bi bi-trash-fill text-danger"></i>';
-};
-
-const columns = [
-    { field: 'EditionParcours', label: 'Edition', formatter: formatterEdition, onClick: (p: Parcours) => parcoursForm.value?.openForm(p), style: 'width: 32px; text-align: center;' },
-    { field: 'ID', label: 'ID', formatter: null, onClick: null, style: undefined },
-    { field: 'NomParcours', label: 'Intitulé', formatter: null, onClick: null, style: undefined },
-    { field: 'AnneeFormation', label: 'Année', formatter: null, onClick: null, style: undefined },
-    { field: 'DeleteParcours', label: 'Suppression', formatter: formatterSuppression, onClick: onDeleteParcours, style: 'width: 32px; text-align: center;' },
-];
 
 onMounted(() => {
     ParcoursDAO.getInstance().list().then((data) => {
@@ -63,21 +61,66 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="container-fluid">
-        <div class="card mt-5">
-            <div class="card-header">
-                <div class="card-title">
-                    <h4>Liste des parcours</h4>
-                </div>
-                <CustomButton :color="BootstrapButtonEnum.info" @click="() => parcoursForm?.openForm()">
-                    Ajouter un parcours
-                </CustomButton>
+    <div class="page-container">
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">Parcours</h1>
+                <p class="page-subtitle">Gérez les parcours de formation</p>
             </div>
-            <div class="card-body">
-                <CustomTable idAttribute="ID" :columns="columns" :data="parcours" />
-            </div>
+            <button class="btn-add" @click="() => parcoursForm?.openForm()">
+                <i class="bi bi-plus-lg"></i>
+                Nouveau parcours
+            </button>
         </div>
-    </div>
 
-    <ParcoursForm ref="parcoursForm" @create:parcours="onParcoursCreated" @update:parcours="onParcoursUpdated" />
+        <div class="search-container">
+            <i class="bi bi-search search-icon"></i>
+            <input 
+                v-model="searchQuery"
+                type="text" 
+                class="search-input" 
+                placeholder="Rechercher un parcours..."
+            >
+        </div>
+
+        <div class="table-container">
+            <table class="modern-table">
+                <thead>
+                    <tr>
+                        <th>Année</th>
+                        <th>Intitulé</th>
+                        <th class="actions-col">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-if="filteredParcours.length === 0">
+                        <td colspan="3" class="empty-state">
+                            <i class="bi bi-inbox"></i>
+                            <p>Aucun parcours trouvé</p>
+                        </td>
+                    </tr>
+                    <tr v-for="p in filteredParcours" :key="p.ID!">
+                        <td>
+                            <span class="badge">
+                                {{ p.AnneeFormation }}
+                            </span>
+                        </td>
+                        <td class="name-col">{{ p.NomParcours }}</td>
+                        <td class="actions-col">
+                            <div class="actions">
+                                <button class="action-btn edit" @click="parcoursForm?.openForm(p)" title="Modifier">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="action-btn delete" @click="onDeleteParcours(p)" title="Supprimer">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <ParcoursForm ref="parcoursForm" @create:parcours="onParcoursCreated" @update:parcours="onParcoursUpdated" />
+    </div>
 </template>

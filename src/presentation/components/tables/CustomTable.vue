@@ -30,9 +30,3 @@ defineProps<{
 
     </table>
 </template>
-
-<style scoped>
-.clickable {
-    cursor: pointer;
-}
-</style>
