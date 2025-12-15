@@ -22,7 +22,7 @@ export class Ue implements IUe {
       ID: this.ID, 
       Intitule: this.Intitule, 
       NumeroUe: this.NumeroUe, 
-      Parcours: this.Parcours?.map((p: any) => p.ID || p.id) || []
+      Parcours: this.Parcours?.map((parcours) => parcours.ID) || []
     };
   } 
 }

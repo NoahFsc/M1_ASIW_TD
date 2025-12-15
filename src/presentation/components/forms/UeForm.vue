@@ -22,38 +22,38 @@ const formErrors = ref<{
 }); 
  
 const parcoursOptions = ref<Parcours[]>([]); 
- 
+
+const parseParcours = (p: any): Parcours => {
+    if (typeof p === 'number') {
+        return parcoursOptions.value.find(opt => opt.ID === p) || new Parcours(p, `Parcours ${p}`, null);
+    }
+    return new Parcours(p.ID, p.NomParcours, p.AnneeFormation);
+};
+
 const openForm = (ue: Ue | null = null) => { 
     isOpen.value = true; 
     if (ue) { 
-        const parcoursData = ue.Parcours || [];
-        
-        const parcoursList = parcoursData.map((p: any) => {
-            if (typeof p === 'number') {
-                const found = parcoursOptions.value.find(opt => opt.ID === p);
-                return found || new Parcours(p, `Parcours ${p}`, null);
-            }
-            return new Parcours(p.ID, p.NomParcours, p.AnneeFormation);
-        });
-        
         currentUe.value = new Ue(
             ue.ID,
             ue.NumeroUe,
             ue.Intitule,
-            parcoursList
+            (ue.Parcours || []).map(parseParcours)
         );
     } 
 }; 
  
 const closeForm = () => { 
     isOpen.value = false; 
-    currentUe.value = new Ue(null, null, null, null); 
+    currentUe.value = new Ue(null, null, null, null);
+    formErrors.value = { NumeroUe: null, Intitule: null, parcours: null };
 }; 
  
 const saveUe = () => { 
     if (formErrors.value.Intitule || formErrors.value.NumeroUe) { 
         return; 
     } 
+
+    console.log('UE sauvegardée :', currentUe.value);
  
     if (currentUe.value.ID) { 
         UeDAO.getInstance().update(currentUe.value.ID, currentUe.value).then(() => { 
@@ -74,21 +74,9 @@ const saveUe = () => {
     } 
 }; 
  
-const props = defineProps({ 
-    ue: { 
-        type: Object as () => Ue | null, 
-        required: false, 
-        default: null, 
-    }, 
-}); 
- 
 const emit = defineEmits(['create:ue', 'update:ue']); 
  
 onBeforeMount(() => { 
-    if (props.ue) { 
-        currentUe.value = props.ue; 
-    } 
- 
     ParcoursDAO.getInstance().list().then((parcours) => { 
         parcoursOptions.value = parcours 
     }); 
@@ -97,13 +85,6 @@ onBeforeMount(() => {
 defineExpose({ 
     openForm, 
     closeForm, 
-}); 
- 
-watch(() => props.ue, (newUE) => { 
-    if (newUE) { 
-        currentUe.value = newUE; 
-        openForm(); 
-    } 
 }); 
  
 watch(() => currentUe.value.Intitule, () => { 
@@ -157,7 +138,6 @@ watch(() => currentUe.value.NumeroUe, () => {
                         label="NomParcours"
                         v-model="currentUe.Parcours" 
                         :options="parcoursOptions"
-                        :reduce="(p: any) => p"
                         :getOptionKey="(p: any) => p.ID || p.id"
                         class="form-select-modern"
                         placeholder="Sélectionner les parcours..."

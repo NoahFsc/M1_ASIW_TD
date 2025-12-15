@@ -12,6 +12,7 @@ const menuItems = [
     { to: '/', icon: 'bi-house-door', label: 'Accueil' },
     { to: '/parcours', icon: 'bi-signpost-2', label: 'Parcours' },
     { to: '/ues', icon: 'bi-book', label: 'UEs' },
+    { to: '/etudiants', icon: 'bi-people', label: 'Étudiants' },
 ]
 </script>
 
