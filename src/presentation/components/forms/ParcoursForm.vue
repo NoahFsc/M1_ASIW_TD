@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { ref, onBeforeMount, defineExpose, defineProps, toRaw, watch } from 'vue';
-import { BootstrapButtonEnum } from '@/types/BootstrapButtonEnum';
+import { ref, onBeforeMount, toRaw, watch } from 'vue';
+import { Toast } from '@/services/ToastService';
 import { Parcours } from '@/domain/entities/Parcours';
+import CustomModal from '@/presentation/components/modals/CustomModal.vue';
 import CustomInput from '@/presentation/components/forms/components/CustomInput.vue';
 import CustomButton from '@/presentation/components/forms/components/CustomButton.vue';
-import CustomModal from '@/presentation/components/modals/CustomModal.vue'; 
 import { ParcoursDAO } from '@/domain/daos/ParcoursDAO';
 
 const currentParcours = ref<Parcours>(new Parcours(null, null, null));
@@ -35,19 +35,19 @@ const saveParcours = () => {
 
   if (currentParcours.value.ID) { 
     ParcoursDAO.getInstance().update(currentParcours.value.ID, currentParcours.value).then(() => { 
-      alert('Parcours mis à jour avec succès');
-      emit('update:parcours', structuredClone(toRaw(currentParcours.value))); // Comme mon API renvoie une 204, copier le content pour mettre à jour automatiquement dans l'affichage du tableau
+      Toast.success('Parcours mis à jour avec succès');
+      emit('update:parcours', structuredClone(toRaw(currentParcours.value))); // Comme mon API renvoie une 204 No Content, je copie le content pour mettre à jour automatiquement l'affichage du tableau
       closeForm(); 
     }).catch((ex) => { 
-      alert(ex.message); 
+      Toast.error(ex.message); 
     });
   } else { 
     ParcoursDAO.getInstance().create(currentParcours.value).then((newParcours) => { 
-      alert('Parcours créé avec succès');
+      Toast.success('Parcours créé avec succès');
       emit('create:parcours', newParcours);
       closeForm(); 
     }).catch((ex) => { 
-      alert(ex.message); 
+      Toast.error(ex.message); 
     }); 
   } 
 
@@ -92,8 +92,8 @@ watch(() => currentParcours.value.NomParcours, () => {
 
 watch(() => currentParcours.value.AnneeFormation, () => {
   const annee = Number(currentParcours.value.AnneeFormation);
-  if (currentParcours.value.AnneeFormation === null || Number.isNaN(annee) || annee < 2000 || annee > 2100) {
-    formErrors.value.AnneeFormation = 'L\'année de formation doit être un nombre entre 2000 et 2100';
+  if (currentParcours.value.AnneeFormation === null || Number.isNaN(annee) || annee > new Date().getFullYear()) {
+    formErrors.value.AnneeFormation = 'L\'année de formation ne doit pas être dans le futur';
   } else {
     formErrors.value.AnneeFormation = null;
   }
@@ -101,33 +101,37 @@ watch(() => currentParcours.value.AnneeFormation, () => {
 </script>
 
 <template> 
-  <CustomModal :isOpen="isOpen"> 
+  <CustomModal :isOpen="isOpen" @close="closeForm"> 
     <template v-slot:title> 
-      <template v-if="parcours && parcours.ID"> Modification du parcours </template> 
-      <template v-else> Nouveau parcours </template> 
+      <template v-if="currentParcours.ID">Modifier le parcours</template> 
+      <template v-else>Nouveau parcours</template> 
     </template>
 
     <template v-slot:body> 
-      <div class="text-start mt-1 mb-1"> 
-        <form> 
-          <CustomInput v-model="currentParcours.NomParcours" id="intitule" libelle="Intitulé" type="text" 
-            placeholder="Intitulé du parcours" :error="formErrors.NomParcours" /> 
-          <CustomInput v-model="currentParcours.AnneeFormation" class="mt-2" id="annee" libelle="Année" type="number" 
-            placeholder="Année de formation" :error="formErrors.AnneeFormation" /> 
-        </form> 
-      </div> 
-      <CustomButton class="mt-1" style="margin-left: 5px" :color="BootstrapButtonEnum.danger" @click="closeForm"> 
-        Annuler 
-      </CustomButton> 
-      <CustomButton class="mt-1" style="margin-left: 5px" :color="BootstrapButtonEnum.primary" @click="saveParcours"> 
-        Enregistrer 
-      </CustomButton> 
+      <form class="form-modern" @submit.prevent="saveParcours">
+        <CustomInput 
+          v-model="currentParcours.NomParcours" 
+          id="intitule" 
+          libelle="Intitulé" 
+          type="text" 
+          placeholder="Ex: MIAGE"
+          :error="formErrors.NomParcours"
+        />
+
+        <CustomInput 
+          v-model="currentParcours.AnneeFormation" 
+          id="annee" 
+          libelle="Année de formation" 
+          type="number" 
+          placeholder="Ex: 1"
+          :error="formErrors.AnneeFormation"
+        />
+
+        <div class="form-actions">
+          <CustomButton variant="cancel" @click="closeForm">Annuler</CustomButton>
+          <CustomButton variant="submit">Enregistrer</CustomButton>
+        </div>
+      </form>
     </template> 
   </CustomModal> 
 </template> 
-
-<style scoped> 
-.card-text { 
-  text-align: left; 
-} 
-</style> 

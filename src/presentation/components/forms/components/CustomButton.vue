@@ -1,22 +1,14 @@
 <script setup lang="ts">
-import { BootstrapButtonEnum } from '@/types/BootstrapButtonEnum';
-import { computed, defineProps } from 'vue';
-
-const props = defineProps<{
-    color: BootstrapButtonEnum
+defineProps<{
+    variant?: 'submit' | 'cancel'
 }>();
-
-const buttonClasses = computed(() => {
-
-    return {
-        'btn': true,
-        [props.color]: true
-    }
-});
 </script>
 
 <template>
-    <button type="button" :class="buttonClasses">
+    <button 
+        :type="variant === 'submit' ? 'submit' : 'button'" 
+        :class="variant === 'submit' ? 'btn-submit' : 'btn-cancel'"
+    >
         <slot />
     </button>
 </template>

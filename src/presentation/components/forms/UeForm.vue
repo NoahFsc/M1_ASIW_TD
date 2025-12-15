@@ -1,11 +1,11 @@
 <script setup lang="ts"> 
-import { ref, onBeforeMount, defineExpose, defineProps, watch, toRaw } from 'vue'; 
-import { BootstrapButtonEnum } from '@/types/BootstrapButtonEnum'; 
+import { ref, onBeforeMount, watch, toRaw } from 'vue'; 
+import { Toast } from '@/services/ToastService';
 import { Ue } from '@/domain/entities/Ue';
 import { Parcours } from '@/domain/entities/Parcours'; 
-import CustomInput from '@/presentation/components/forms/components/CustomInput.vue'; 
-import CustomButton from '@/presentation/components/forms/components/CustomButton.vue'; 
-import CustomModal from '@/presentation/components/modals/CustomModal.vue'; 
+import CustomModal from '@/presentation/components/modals/CustomModal.vue';
+import CustomInput from '@/presentation/components/forms/components/CustomInput.vue';
+import CustomButton from '@/presentation/components/forms/components/CustomButton.vue';
 import { UeDAO } from '@/domain/daos/UeDAO'; 
 import { ParcoursDAO } from '@/domain/daos/ParcoursDAO'; 
  
@@ -28,14 +28,11 @@ const openForm = (ue: Ue | null = null) => {
     if (ue) { 
         const parcoursData = ue.Parcours || [];
         
-        // Transformer les IDs en objets Parcours complets pour v-select
         const parcoursList = parcoursData.map((p: any) => {
-            // Si c'est un ID (nombre), chercher l'objet complet dans parcoursOptions
             if (typeof p === 'number') {
                 const found = parcoursOptions.value.find(opt => opt.ID === p);
                 return found || new Parcours(p, `Parcours ${p}`, null);
             }
-            // Si c'est déjà un objet
             return new Parcours(p.ID, p.NomParcours, p.AnneeFormation);
         });
         
@@ -60,19 +57,19 @@ const saveUe = () => {
  
     if (currentUe.value.ID) { 
         UeDAO.getInstance().update(currentUe.value.ID, currentUe.value).then(() => { 
-            alert('UE mise à jour avec succès'); 
+            Toast.success('UE mise à jour avec succès'); 
             emit('update:ue', JSON.parse(JSON.stringify(toRaw(currentUe.value)))); 
             closeForm(); 
         }).catch((ex) => { 
-            alert(ex.message); 
+            Toast.error(ex.message); 
         }); 
     } else { 
         UeDAO.getInstance().create(currentUe.value).then((newUe) => { 
-            alert('UE créée avec succès'); 
+            Toast.success('UE créée avec succès'); 
             emit('create:ue', newUe); 
             closeForm(); 
         }).catch((ex) => { 
-            alert(ex.message); 
+            Toast.error(ex.message); 
         }); 
     } 
 }; 
@@ -92,7 +89,6 @@ onBeforeMount(() => {
         currentUe.value = props.ue; 
     } 
  
-    // Chargement de la liste des parcours 
     ParcoursDAO.getInstance().list().then((parcours) => { 
         parcoursOptions.value = parcours 
     }); 
@@ -128,41 +124,52 @@ watch(() => currentUe.value.NumeroUe, () => {
 </script> 
  
 <template> 
-    <CustomModal :isOpen="isOpen"> 
-        <template v-slot:title> 
-            <template v-if="ue && ue.ID"> Modification de l'UE</template> 
-            <template v-else> Nouvelle UE</template> 
-        </template> 
+    <CustomModal :isOpen="isOpen">
+        <template #title>
+            {{ currentUe.ID ? 'Modifier l\'UE' : 'Nouvelle UE' }}
+        </template>
 
-        <template v-slot:body> 
-            <div class="text-start mt-1 mb-1">
-                <form> 
-                    <CustomInput v-model="currentUe.NumeroUe" class="mt-2" id="numeroue" libelle="Numéro" type="text" 
-                        placeholder="Numéro d'UE" :error="formErrors.NumeroUe" /> 
-                    <CustomInput v-model="currentUe.Intitule" id="intitule" libelle="Intitulé" type="text" 
-                        placeholder="Intitulé de l'UE" :error="formErrors.Intitule" /> 
-                    <div class="form-group"> 
-                        <label for="intitule">Parcours :</label> 
-                        <v-select 
-                            multiple 
-                            label="NomParcours"
-                            v-model="currentUe.Parcours" 
-                            :options="parcoursOptions"
-                            :reduce="(p: any) => p"
-                            :getOptionKey="(p: any) => p.ID || p.id"
-                        ></v-select> 
-                        <div v-if="formErrors.parcours" class="invalid-feedback"> 
-                            {{ formErrors.parcours }} 
-                        </div> 
-                    </div> 
-                </form> 
-            </div> 
-            <CustomButton class="mt-1" style="margin-left: 5px" :color="BootstrapButtonEnum.danger" @click="closeForm"> 
-                Annuler 
-            </CustomButton> 
-            <CustomButton class="mt-1" style="margin-left: 5px" :color="BootstrapButtonEnum.primary" @click="saveUe"> 
-                Enregistrer 
-            </CustomButton> 
-        </template> 
+        <template #body>
+            <form class="form-modern" @submit.prevent="saveUe">
+                <CustomInput 
+                    v-model="currentUe.NumeroUe"
+                    id="numeroue"
+                    libelle="Numéro d'UE"
+                    type="text"
+                    placeholder="Ex: UE301"
+                    :error="formErrors.NumeroUe"
+                />
+
+                <CustomInput 
+                    v-model="currentUe.Intitule"
+                    id="intitule"
+                    libelle="Intitulé"
+                    type="text"
+                    placeholder="Ex: Développement Web"
+                    :error="formErrors.Intitule"
+                />
+
+                <div class="form-group">
+                    <label class="form-label" for="parcours">Parcours</label>
+                    <v-select 
+                        id="parcours"
+                        multiple 
+                        label="NomParcours"
+                        v-model="currentUe.Parcours" 
+                        :options="parcoursOptions"
+                        :reduce="(p: any) => p"
+                        :getOptionKey="(p: any) => p.ID || p.id"
+                        class="form-select-modern"
+                        placeholder="Sélectionner les parcours..."
+                    ></v-select>
+                    <span v-if="formErrors.parcours" class="form-error">{{ formErrors.parcours }}</span>
+                </div>
+
+                <div class="form-actions">
+                    <CustomButton variant="cancel" @click="closeForm">Annuler</CustomButton>
+                    <CustomButton variant="submit">{{ currentUe.ID ? 'Modifier' : 'Créer' }}</CustomButton>
+                </div>
+            </form>
+        </template>
     </CustomModal> 
 </template>

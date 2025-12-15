@@ -50,114 +50,30 @@ const menuItems = [
 </template>
 
 <style scoped>
-.sidebar {
-    background-color: var(--sidebar-bg, #273656);
-    color: white;
-    width: 250px;
-    min-height: 100vh;
-    padding: 1rem;
-    transition: width 0.3s ease;
-}
+/* Sidebar Container */
+.sidebar { background-color: var(--color-primary, #273656); color: white; width: 250px; min-height: 100vh; padding: 1rem; transition: width 0.3s ease; }
+.sidebar.collapsed { width: 70px; }
 
-.sidebar.collapsed {
-    width: 70px;
-}
+/* Header */
+.sidebar-header { gap: 0.75rem; padding: 0.5rem 0; }
+.sidebar.collapsed .sidebar-header { justify-content: center; }
+.sidebar-logo { font-size: 1.5rem; flex-shrink: 0; }
+.sidebar-title { font-size: 1.25rem; font-weight: 600; white-space: nowrap; overflow: hidden; }
+.sidebar-divider { border-color: rgba(255, 255, 255, 0.2); margin: 0.75rem 0; }
 
-.sidebar-header {
-    gap: 0.75rem;
-    padding: 0.5rem 0;
-}
+/* Navigation */
+.sidebar-nav .nav { gap: 0.5rem; }
+.sidebar-nav .nav-link { color: rgba(255, 255, 255, 0.8); padding: 0.75rem; border-radius: 8px; gap: 0.75rem; transition: all 0.2s; text-decoration: none; }
+.sidebar-nav .nav-link:hover { background-color: rgba(255, 255, 255, 0.1); color: white; }
+.sidebar-nav .nav-link.active { background-color: rgba(255, 255, 255, 0.2); color: white; }
+.sidebar-nav .nav-link i { font-size: 1.1rem; flex-shrink: 0; width: 24px; text-align: center; }
+.nav-label { white-space: nowrap; overflow: hidden; }
+.sidebar.collapsed .nav-link { justify-content: center; padding: 0.75rem 0.5rem; }
 
-.sidebar.collapsed .sidebar-header {
-    justify-content: center;
-}
-
-.sidebar-logo {
-    font-size: 1.5rem;
-    flex-shrink: 0;
-}
-
-.sidebar-title {
-    font-size: 1.25rem;
-    font-weight: 600;
-    white-space: nowrap;
-    overflow: hidden;
-}
-
-.sidebar-divider {
-    border-color: rgba(255, 255, 255, 0.2);
-    margin: 0.75rem 0;
-}
-
-.sidebar-nav .nav {
-    gap: 0.5rem;
-}
-
-.sidebar-nav .nav-link {
-    color: rgba(255, 255, 255, 0.8);
-    padding: 0.75rem;
-    border-radius: 8px;
-    gap: 0.75rem;
-    transition: all 0.2s;
-    text-decoration: none;
-}
-
-.sidebar-nav .nav-link:hover {
-    background-color: rgba(255, 255, 255, 0.1);
-    color: white;
-}
-
-.sidebar-nav .nav-link.active {
-    background-color: rgba(255, 255, 255, 0.2);
-    color: white;
-}
-
-.sidebar-nav .nav-link i {
-    font-size: 1.1rem;
-    flex-shrink: 0;
-    width: 24px;
-    text-align: center;
-}
-
-.nav-label {
-    white-space: nowrap;
-    overflow: hidden;
-}
-
-.sidebar.collapsed .nav-link {
-    justify-content: center;
-    padding: 0.75rem 0.5rem;
-}
-
-.toggle-btn {
-    background: transparent;
-    border: none;
-    color: rgba(255, 255, 255, 0.8);
-    cursor: pointer;
-    padding: 0.75rem;
-    border-radius: 8px;
-    transition: all 0.2s;
-    gap: 0.75rem;
-}
-
-.toggle-btn:hover {
-    background-color: rgba(255, 255, 255, 0.1);
-    color: white;
-}
-
-.toggle-btn i {
-    font-size: 1.1rem;
-    flex-shrink: 0;
-    width: 24px;
-    text-align: center;
-}
-
-.toggle-label {
-    white-space: nowrap;
-    overflow: hidden;
-}
-
-.sidebar.collapsed .toggle-btn {
-    justify-content: center;
-}
+/* Toggle Button */
+.toggle-btn { background: transparent; border: none; color: rgba(255, 255, 255, 0.8); cursor: pointer; padding: 0.75rem; border-radius: 8px; transition: all 0.2s; gap: 0.75rem; }
+.toggle-btn:hover { background-color: rgba(255, 255, 255, 0.1); color: white; }
+.toggle-btn i { font-size: 1.1rem; flex-shrink: 0; width: 24px; text-align: center; }
+.toggle-label { white-space: nowrap; overflow: hidden; }
+.sidebar.collapsed .toggle-btn { justify-content: center; }
 </style>

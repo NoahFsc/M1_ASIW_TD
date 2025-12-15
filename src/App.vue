@@ -13,18 +13,7 @@ import Sidebar from './presentation/components/navigation/Sidebar.vue'
 </template>
 
 <style scoped>
-main {
-  overflow-x: auto;
-  overflow-y: hidden;
-}
-
-main .application {
-  width: 100%;
-  height: 100vh;
-}
-
-.content {
-  height: 100vh;
-  flex-grow: 1;
-}
+main { overflow-x: auto; overflow-y: hidden; }
+main .application { width: 100%; height: 100vh; }
+.content { height: 100vh; flex-grow: 1; }
 </style>
