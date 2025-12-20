@@ -28,10 +28,10 @@ const onDeleteParcours = async (p: Parcours) => {
 };
 
 const columns = [
-    { field: 'ID', label: 'Id', formatter: null, onClick: undefined, style: undefined },
-    { field: 'NomParcours', label: 'Nom du Parcours', formatter: null, onClick: undefined, style: undefined },
-    { field: 'AnneeFormation', label: 'Année de formation', formatter: null, onClick: undefined, style: undefined },
-    { field: 'Actions', label: 'Actions', formatter: null, onClick: undefined, style: 'width: 100px; text-align: center;' },
+    { field: 'ID', label: 'Id' },
+    { field: 'NomParcours', label: 'Nom du Parcours' },
+    { field: 'AnneeFormation', label: 'Année de formation' },
+    { field: 'Actions', label: 'Actions', style: 'width: 100px; text-align: center;' },
 ];
 
 const filteredParcours = computed(() => {

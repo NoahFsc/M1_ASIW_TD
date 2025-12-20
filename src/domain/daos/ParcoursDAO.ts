@@ -15,21 +15,21 @@ export class ParcoursDAO implements IDAO<Parcours> {
         return ParcoursDAO.instance;
     }
 
-    public async create(data: Parcours): Promise<Parcours> {
-        try {
-            const response = await apiClient.post('/api/Parcours', data);
-            return response.data;
-        } catch (error) {
-            throw new Error(getErrorMessage(error, 'Impossible de créer le nouveau parcours'));
-        }
-    }
-
     public async get(id: number): Promise<Parcours> {
         try {
             const response = await apiClient.get(`/api/Parcours/${id}`);
             return response.data;
         } catch (error) {
             throw new Error(getErrorMessage(error, 'Impossible de récupérer le parcours'));
+        }
+    }
+
+    public async create(data: Parcours): Promise<Parcours> {
+        try {
+            const response = await apiClient.post('/api/Parcours', data);
+            return response.data;
+        } catch (error) {
+            throw new Error(getErrorMessage(error, 'Impossible de créer le nouveau parcours'));
         }
     }
 

@@ -8,6 +8,10 @@ import CustomInput from '@/presentation/components/forms/components/CustomInput.
 import CustomButton from '@/presentation/components/forms/components/CustomButton.vue';
 import { UeDAO } from '@/domain/daos/UeDAO'; 
 import { ParcoursDAO } from '@/domain/daos/ParcoursDAO'; 
+import { parseParcours } from '@/domain/utils/parcoursHelper';
+import { validateMinLength } from '@/domain/utils/validators';
+
+const emit = defineEmits(['create:ue', 'update:ue']); 
  
 const currentUe = ref<Ue>(new Ue(null, null, null, null)); 
 const isOpen = ref(false); 
@@ -23,13 +27,6 @@ const formErrors = ref<{
  
 const parcoursOptions = ref<Parcours[]>([]); 
 
-const parseParcours = (p: any): Parcours => {
-    if (typeof p === 'number') {
-        return parcoursOptions.value.find(opt => opt.ID === p) || new Parcours(p, `Parcours ${p}`, null);
-    }
-    return new Parcours(p.ID, p.NomParcours, p.AnneeFormation);
-};
-
 const openForm = (ue: Ue | null = null) => { 
     isOpen.value = true; 
     if (ue) { 
@@ -37,7 +34,7 @@ const openForm = (ue: Ue | null = null) => {
             ue.ID,
             ue.NumeroUe,
             ue.Intitule,
-            (ue.Parcours || []).map(parseParcours)
+            (ue.Parcours || []).map(p => parseParcours(p, parcoursOptions.value))
         );
     } 
 }; 
@@ -48,38 +45,27 @@ const closeForm = () => {
     formErrors.value = { NumeroUe: null, Intitule: null, parcours: null };
 }; 
  
-const saveUe = () => { 
-    if (formErrors.value.Intitule || formErrors.value.NumeroUe) { 
-        return; 
-    } 
-
-    console.log('UE sauvegardée :', currentUe.value);
+const saveUe = async () => { 
+    if (formErrors.value.Intitule || formErrors.value.NumeroUe) return;
  
-    if (currentUe.value.ID) { 
-        UeDAO.getInstance().update(currentUe.value.ID, currentUe.value).then(() => { 
+    try {
+        if (currentUe.value.ID) { 
+            await UeDAO.getInstance().update(currentUe.value.ID, currentUe.value);
             Toast.success('UE mise à jour avec succès'); 
             emit('update:ue', JSON.parse(JSON.stringify(toRaw(currentUe.value)))); 
-            closeForm(); 
-        }).catch((ex) => { 
-            Toast.error(ex.message); 
-        }); 
-    } else { 
-        UeDAO.getInstance().create(currentUe.value).then((newUe) => { 
+        } else { 
+            const newUe = await UeDAO.getInstance().create(currentUe.value);
             Toast.success('UE créée avec succès'); 
             emit('create:ue', newUe); 
-            closeForm(); 
-        }).catch((ex) => { 
-            Toast.error(ex.message); 
-        }); 
-    } 
+        } 
+        closeForm(); 
+    } catch (ex: any) {
+        Toast.error(ex.message); 
+    }
 }; 
  
-const emit = defineEmits(['create:ue', 'update:ue']); 
- 
-onBeforeMount(() => { 
-    ParcoursDAO.getInstance().list().then((parcours) => { 
-        parcoursOptions.value = parcours 
-    }); 
+onBeforeMount(async () => { 
+    parcoursOptions.value = await ParcoursDAO.getInstance().list();
 }); 
  
 defineExpose({ 
@@ -88,19 +74,11 @@ defineExpose({
 }); 
  
 watch(() => currentUe.value.Intitule, () => { 
-    if (!currentUe.value.Intitule || currentUe.value.Intitule.trim() === '' || currentUe.value.Intitule.length < 3) { 
-        formErrors.value.Intitule = 'L\'intitulé doit faire au moins 3 caractères'; 
-    } else { 
-        formErrors.value.Intitule = null; 
-    } 
+    formErrors.value.Intitule = validateMinLength(currentUe.value.Intitule, 3, 'L\'intitulé');
 }); 
  
 watch(() => currentUe.value.NumeroUe, () => { 
-    if (!currentUe.value.NumeroUe || currentUe.value.NumeroUe.trim() === '' || currentUe.value.NumeroUe.length < 3) { 
-        formErrors.value.NumeroUe = 'Le numéro d\'ue doit faire au moins 3 caractères'; 
-    } else { 
-        formErrors.value.NumeroUe = null; 
-    } 
+    formErrors.value.NumeroUe = validateMinLength(currentUe.value.NumeroUe, 3, 'Le numéro d\'UE');
 }); 
 </script> 
  

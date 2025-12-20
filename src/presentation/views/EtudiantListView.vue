@@ -7,6 +7,7 @@ import { Etudiant } from '@/domain/entities/Etudiant';
 import { EtudiantDAO } from '@/domain/daos/EtudiantDAO';
 import { Parcours } from '@/domain/entities/Parcours';
 import { ParcoursDAO } from '@/domain/daos/ParcoursDAO';
+import { getParcoursNom } from '@/domain/utils/parcoursHelper';
 
 const etudiantForm = ref<InstanceType<typeof EtudiantForm> | null>(null);
 const etudiants = ref<Etudiant[]>([]);
@@ -51,14 +52,8 @@ const filteredEtudiants = computed(() => {
     );
 });
 
-const getParcoursNom = (etudiant: Etudiant): string => {
-    const parcours = etudiant.ParcoursSuivi as any;
-    if (!parcours) return '-';
-    
-    if (typeof parcours === 'number') {
-        return parcoursMap.value.get(parcours)?.NomParcours || `ID ${parcours}`;
-    }
-    return parcours.NomParcours || '-';
+const getParcoursNomLocal = (etudiant: Etudiant): string => {
+    return getParcoursNom(etudiant.ParcoursSuivi, parcoursMap.value);
 };
 
 const getCellValue = (etudiant: Etudiant, field: string): string => {
@@ -131,7 +126,7 @@ onMounted(async () => {
                                 </div>
                             </template>
                             <template v-else-if="col.field === 'ParcoursSuivi'">
-                                <span class="badge">{{ getParcoursNom(etudiant) }}</span>
+                                <span class="badge">{{ getParcoursNomLocal(etudiant) }}</span>
                             </template>
                             <template v-else>
                                 {{ getCellValue(etudiant, col.field) }}

@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { defineProps } from 'vue';
 
 defineProps({
     isOpen: {
@@ -12,6 +11,8 @@ defineProps({
         default: null,
     },
 });
+
+defineEmits(['close']);
 </script>
 
 <template>

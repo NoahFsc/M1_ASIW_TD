@@ -15,5 +15,5 @@ import Sidebar from './presentation/components/navigation/Sidebar.vue'
 <style scoped>
 main { overflow-x: auto; overflow-y: hidden; }
 main .application { width: 100%; height: 100vh; }
-.content { height: 100vh; flex-grow: 1; }
+.content { height: 100vh; flex-grow: 1; overflow-y: auto; }
 </style>

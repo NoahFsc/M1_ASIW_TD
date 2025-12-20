@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref, computed } from 'vue';
+import { useRouter } from 'vue-router';
 import { Toast } from '@/services/ToastService';
 import UeForm from '@/presentation/components/forms/UeForm.vue';
 import SearchBar from '@/presentation/components/common/SearchBar.vue';
@@ -8,10 +9,15 @@ import { UeDAO } from '@/domain/daos/UeDAO';
 import { Parcours } from '@/domain/entities/Parcours';
 import { ParcoursDAO } from '@/domain/daos/ParcoursDAO';
 
+const router = useRouter();
 const ueForm = ref<InstanceType<typeof UeForm> | null>(null);
 const ues = ref<Ue[]>([]);
 const parcoursMap = ref<Map<number, Parcours>>(new Map());
 const searchQuery = ref('');
+
+const goToUeDetail = (ue: Ue) => {
+    router.push(`/ues/${ue.ID}`);
+};
 
 const onDeleteUe = async (ue: Ue) => {
     const confirmed = await Toast.confirmDelete(
@@ -31,11 +37,11 @@ const onDeleteUe = async (ue: Ue) => {
 };
 
 const columns = [
-    { field: 'ID', label: 'Id', formatter: null, onClick: undefined, style: undefined },
-    { field: 'NumeroUe', label: 'Numéro Ue', formatter: null, onClick: undefined, style: undefined },
-    { field: 'Intitule', label: 'Intitulé', formatter: null, onClick: undefined, style: undefined },
-    { field: 'Parcours', label: 'Parcours', formatter: null, onClick: undefined, style: undefined },
-    { field: 'Actions', label: 'Actions', formatter: null, onClick: undefined, style: 'width: 100px; text-align: center;' },
+    { field: 'ID', label: 'Id' },
+    { field: 'NumeroUe', label: 'Numéro Ue' },
+    { field: 'Intitule', label: 'Intitulé' },
+    { field: 'Parcours', label: 'Parcours' },
+    { field: 'Actions', label: 'Actions', style: 'width: 100px; text-align: center;' },
 ];
 
 const filteredUes = computed(() => {
@@ -118,7 +124,7 @@ onMounted(async () => {
                         <td v-for="col in columns" :key="col.field" :style="col.style">
                             <template v-if="col.field === 'Actions'">
                                 <div class="actions">
-                                    <button class="action-btn edit" @click="ueForm?.openForm(ue)">
+                                    <button class="action-btn edit" @click="goToUeDetail(ue)">
                                         <i class="bi bi-pencil"></i>
                                     </button>
                                     <button class="action-btn delete" @click="onDeleteUe(ue)">

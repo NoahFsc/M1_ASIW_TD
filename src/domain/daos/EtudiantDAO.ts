@@ -15,15 +15,6 @@ export class EtudiantDAO implements IDAO<Etudiant> {
         return EtudiantDAO.instance;
     }
 
-    public async create(data: Etudiant): Promise<Etudiant> {
-        try {
-            const response = await apiClient.post('/api/Etudiant', data.toJSON());
-            return response.data;
-        } catch (error) {
-            throw new Error(getErrorMessage(error, 'Impossible de créer l\'étudiant'));
-        }
-    }
-
     public async get(id: number): Promise<Etudiant> {
         try {
             const response = await apiClient.get(`/api/Etudiant/${id}`);
@@ -33,16 +24,25 @@ export class EtudiantDAO implements IDAO<Etudiant> {
         }
     }
 
+    public async create(data: Etudiant): Promise<Etudiant> {
+        try {
+            const response = await apiClient.post('/api/Etudiant', data.toJSON());
+            return response.data;
+        } catch (error) {
+            throw new Error(getErrorMessage(error, 'Impossible de créer l\'étudiant'));
+        }
+    }
+
     public async update(id: number, data: Etudiant, oldParcoursId: number | null = null): Promise<Etudiant> {
         const newParcoursId = data.ParcoursSuivi?.ID || null;
         
-        // Gérer le changement de parcours
-        if (newParcoursId) {
-            // Ajouter au nouveau parcours (le backend gère le retrait de l'ancien si besoin)
-            await this.addToParcours(newParcoursId, id);
-        } else if (oldParcoursId) {
-            // Retirer du parcours si on passe de "un parcours" à "aucun parcours"
-            await this.removeFromParcours(oldParcoursId, id);
+        // Gérer le changement de parcours seulement si différent
+        if (newParcoursId !== oldParcoursId) {
+            if (newParcoursId) {
+                await this.addToParcours(newParcoursId, id);
+            } else if (oldParcoursId) {
+                await this.removeFromParcours(oldParcoursId, id);
+            }
         }
         
         try {

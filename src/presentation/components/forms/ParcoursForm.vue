@@ -6,9 +6,28 @@ import CustomModal from '@/presentation/components/modals/CustomModal.vue';
 import CustomInput from '@/presentation/components/forms/components/CustomInput.vue';
 import CustomButton from '@/presentation/components/forms/components/CustomButton.vue';
 import { ParcoursDAO } from '@/domain/daos/ParcoursDAO';
+import { validateMinLength, validateYear } from '@/domain/utils/validators';
+
+const emit = defineEmits(['create:parcours', 'update:parcours']); 
+
+const props = defineProps({
+    parcours: {
+        type: Object as () => Parcours | null,
+        required: false,
+        default: null,
+    },
+});
 
 const currentParcours = ref<Parcours>(new Parcours(null, null, null));
 const isOpen = ref(false);
+
+const formErrors = ref<{ 
+  NomParcours: string | null; 
+  AnneeFormation: string | null; 
+}>({ 
+  NomParcours: null, 
+  AnneeFormation: null, 
+}); 
 
 const openForm = (parcours: Parcours | null = null) => {
     isOpen.value = true;
@@ -23,51 +42,24 @@ const closeForm = () => {
     currentParcours.value = new Parcours(null, null, null);
 };
 
-const emit = defineEmits(['create:parcours', 'update:parcours']); 
+const saveParcours = async () => { 
+  if (formErrors.value.NomParcours || formErrors.value.AnneeFormation) return;
 
-const saveParcours = () => { 
-
-  if (formErrors.value.NomParcours || formErrors.value.AnneeFormation) { 
-    return; 
-  } 
-
-  console.log('Parcours sauvegardé :', currentParcours.value);
-
-  if (currentParcours.value.ID) { 
-    ParcoursDAO.getInstance().update(currentParcours.value.ID, currentParcours.value).then(() => { 
+  try {
+    if (currentParcours.value.ID) { 
+      await ParcoursDAO.getInstance().update(currentParcours.value.ID, currentParcours.value);
       Toast.success('Parcours mis à jour avec succès');
-      emit('update:parcours', structuredClone(toRaw(currentParcours.value))); // Comme mon API renvoie une 204 No Content, je copie le content pour mettre à jour automatiquement l'affichage du tableau
-      closeForm(); 
-    }).catch((ex) => { 
-      Toast.error(ex.message); 
-    });
-  } else { 
-    ParcoursDAO.getInstance().create(currentParcours.value).then((newParcours) => { 
+      emit('update:parcours', JSON.parse(JSON.stringify(toRaw(currentParcours.value))));
+    } else { 
+      const newParcours = await ParcoursDAO.getInstance().create(currentParcours.value);
       Toast.success('Parcours créé avec succès');
       emit('create:parcours', newParcours);
-      closeForm(); 
-    }).catch((ex) => { 
-      Toast.error(ex.message); 
-    }); 
-  } 
-
+    } 
+    closeForm(); 
+  } catch (ex: any) {
+    Toast.error(ex.message); 
+  }
 }; 
-
-const props = defineProps({
-    parcours: {
-        type: Object as () => Parcours | null,
-        required: false,
-        default: null,
-    },
-});
-
-const formErrors = ref<{ 
-  NomParcours: string | null; 
-  AnneeFormation: string | null; 
-}>({ 
-  NomParcours: null, 
-  AnneeFormation: null, 
-}); 
 
 onBeforeMount(() => {
     if (props.parcours) {
@@ -81,22 +73,11 @@ defineExpose({
 });
 
 watch(() => currentParcours.value.NomParcours, () => { 
-
-  if (!currentParcours.value.NomParcours || currentParcours.value.NomParcours.trim() === '' || currentParcours.value.NomParcours.length < 3) { 
-    formErrors.value.NomParcours = 'Le nom du parcours doit faire au moins 3 caractères'; 
-  } else { 
-    formErrors.value.NomParcours = null; 
-  } 
-
+  formErrors.value.NomParcours = validateMinLength(currentParcours.value.NomParcours, 3, 'Le nom du parcours');
 });
 
 watch(() => currentParcours.value.AnneeFormation, () => {
-  const annee = Number(currentParcours.value.AnneeFormation);
-  if (currentParcours.value.AnneeFormation === null || Number.isNaN(annee) || annee > new Date().getFullYear()) {
-    formErrors.value.AnneeFormation = 'L\'année de formation ne doit pas être dans le futur';
-  } else {
-    formErrors.value.AnneeFormation = null;
-  }
+  formErrors.value.AnneeFormation = validateYear(currentParcours.value.AnneeFormation);
 });
 </script>
 
