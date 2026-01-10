@@ -52,7 +52,8 @@ const saveUe = async () => {
         if (currentUe.value.ID) { 
             await UeDAO.getInstance().update(currentUe.value.ID, currentUe.value);
             Toast.success('UE mise à jour avec succès'); 
-            emit('update:ue', JSON.parse(JSON.stringify(toRaw(currentUe.value)))); 
+            emit('update:ue', JSON.parse(JSON.stringify(toRaw(currentUe.value))));
+            // Ce JSON.parse/JSON.stringify est utilisé pour cloner l'objet du front car les mises à jour renvoient une 204 No Content dans mon API 
         } else { 
             const newUe = await UeDAO.getInstance().create(currentUe.value);
             Toast.success('UE créée avec succès'); 
@@ -89,7 +90,7 @@ watch(() => currentUe.value.NumeroUe, () => {
         </template>
 
         <template #body>
-            <form class="form-modern" @submit.prevent="saveUe">
+            <form class="flex flex-col gap-5" @submit.prevent="saveUe">
                 <CustomInput 
                     v-model="currentUe.NumeroUe"
                     id="numeroue"
@@ -108,8 +109,8 @@ watch(() => currentUe.value.NumeroUe, () => {
                     :error="formErrors.Intitule"
                 />
 
-                <div class="form-group">
-                    <label class="form-label" for="parcours">Parcours</label>
+                <div class="flex flex-col gap-2">
+                    <label class="font-medium text-gray-600 text-sm" for="parcours">Parcours</label>
                     <v-select 
                         id="parcours"
                         multiple 
@@ -117,13 +118,13 @@ watch(() => currentUe.value.NumeroUe, () => {
                         v-model="currentUe.Parcours" 
                         :options="parcoursOptions"
                         :getOptionKey="(p: any) => p.ID || p.id"
-                        class="form-select-modern"
+                        class="vue-select-custom"
                         placeholder="Sélectionner les parcours..."
                     ></v-select>
-                    <span v-if="formErrors.parcours" class="form-error">{{ formErrors.parcours }}</span>
+                    <span v-if="formErrors.parcours" class="text-red-500 text-xs">{{ formErrors.parcours }}</span>
                 </div>
 
-                <div class="form-actions">
+                <div class="flex gap-3 justify-end mt-2">
                     <CustomButton variant="cancel" @click="closeForm">Annuler</CustomButton>
                     <CustomButton variant="submit">{{ currentUe.ID ? 'Modifier' : 'Créer' }}</CustomButton>
                 </div>

@@ -26,6 +26,10 @@ export interface TopUes {
     data: number[];
 }
 
+/**
+ * Calcule les statistiques principales pour le tableau de bord
+ * Compte les entités et calcule la moyenne générale de toutes les notes
+ */
 export function calculateDashboardStats(
     parcours: Parcours[],
     ues: Ue[],
@@ -44,24 +48,29 @@ export function calculateDashboardStats(
     };
 }
 
+/**
+ * Calcule la répartition des étudiants par parcours
+ * Retourne les données triées par ordre décroissant pour le graphique
+ */
 export function calculateParcoursDistribution(
     parcours: Parcours[],
     etudiants: Etudiant[]
 ): ParcoursDistribution {
     const distribution = new Map<number, { nom: string; count: number }>();
     
+    // Initialiser avec tous les parcours
     parcours.forEach(p => {
         distribution.set(p.ID!, { nom: p.NomParcours || 'Sans nom', count: 0 });
     });
 
+    // Compter les étudiants par parcours
     etudiants.forEach(etudiant => {
         const parcoursId = typeof etudiant.ParcoursSuivi === 'number' 
             ? etudiant.ParcoursSuivi 
             : etudiant.ParcoursSuivi?.ID;
         
         if (parcoursId && distribution.has(parcoursId)) {
-            const entry = distribution.get(parcoursId)!;
-            entry.count++;
+            distribution.get(parcoursId)!.count++;
         }
     });
 
@@ -73,6 +82,11 @@ export function calculateParcoursDistribution(
     };
 }
 
+/**
+ * Répartit les notes en 5 catégories
+ * Excellent (≥16), Bien (14-16), Moyen (12-14), Passable (10-12), Insuffisant (<10)
+ * Retourne les données formatées pour un graphique camembert
+ */
 export function calculateNotesDistribution(notes: Note[]): NotesDistribution {
     const ranges = {
         'Excellent (≥16)': 0,
@@ -98,22 +112,29 @@ export function calculateNotesDistribution(notes: Note[]): NotesDistribution {
     };
 }
 
+/**
+ * Identifie les 5 UEs avec le plus grand nombre d'étudiants notés
+ * Utile pour visualiser les UEs les plus actives en termes d'évaluation
+ */
 export function calculateTopUes(
     ues: Ue[],
     notes: Note[]
 ): TopUes {
     const ueNotesCount = new Map<number, { nom: string; count: number }>();
 
+    // Initialiser avec toutes les UEs
     ues.forEach(ue => {
         ueNotesCount.set(ue.ID!, { nom: `${ue.NumeroUe} - ${ue.Intitule}`, count: 0 });
     });
 
+    // Compter les notes par UE
     notes.forEach(note => {
         if (ueNotesCount.has(note.UeId)) {
             ueNotesCount.get(note.UeId)!.count++;
         }
     });
 
+    // Filtrer, trier et limiter au top 5
     const sorted = Array.from(ueNotesCount.values())
         .filter(d => d.count > 0)
         .sort((a, b) => b.count - a.count)

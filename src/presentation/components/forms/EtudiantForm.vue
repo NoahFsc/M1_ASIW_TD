@@ -74,6 +74,7 @@ const saveEtudiant = async () => {
             await EtudiantDAO.getInstance().update(currentEtudiant.value.ID, currentEtudiant.value, originalParcoursId.value);
             Toast.success('Étudiant mis à jour avec succès');
             emit('update:etudiant', JSON.parse(JSON.stringify(toRaw(currentEtudiant.value))));
+            // Ce JSON.parse/JSON.stringify est utilisé pour cloner l'objet du front car les mises à jour renvoient une 204 No Content dans mon API
         } else {
             const newEtudiant = await EtudiantDAO.getInstance().create(currentEtudiant.value);
             Toast.success('Étudiant créé avec succès');
@@ -123,7 +124,7 @@ watch(() => currentEtudiant.value.Email, validateEmail);
         </template>
 
         <template #body>
-            <form class="form-modern" @submit.prevent="saveEtudiant">
+            <form class="flex flex-col gap-4" @submit.prevent="saveEtudiant">
                 <CustomInput 
                     v-model="currentEtudiant.NumEtud"
                     id="numetud"
@@ -160,20 +161,20 @@ watch(() => currentEtudiant.value.Email, validateEmail);
                     :error="formErrors.Email"
                 />
 
-                <div class="form-group">
-                    <label class="form-label" for="parcours">Parcours suivi</label>
+                <div class="flex flex-col gap-2">
+                    <label class="font-medium text-gray-600 text-sm" for="parcours">Parcours suivi</label>
                     <v-select 
                         id="parcours"
                         label="NomParcours"
                         v-model="currentEtudiant.ParcoursSuivi" 
                         :options="parcoursOptions"
                         :getOptionKey="(p: any) => p.ID || p.id"
-                        class="form-select-modern"
+                        class="vue-select-custom"
                         placeholder="Sélectionner un parcours..."
                     ></v-select>
                 </div>
 
-                <div class="form-actions">
+                <div class="flex gap-3 justify-end mt-2">
                     <CustomButton variant="cancel" @click="closeForm">Annuler</CustomButton>
                     <CustomButton variant="submit">{{ currentEtudiant.ID ? 'Modifier' : 'Créer' }}</CustomButton>
                 </div>

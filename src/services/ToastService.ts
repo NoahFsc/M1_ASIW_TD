@@ -1,5 +1,7 @@
 import Swal from 'sweetalert2';
 
+// Utilitaire pour afficher des toasts et des confirmations de suppression
+
 type ToastIcon = 'success' | 'error' | 'warning' | 'info';
 
 const toast = (icon: ToastIcon, title: string) => {
@@ -21,7 +23,7 @@ const confirmDelete = (title: string, text: string): Promise<boolean> => {
         icon: 'warning',
         iconColor: '#ef4444',
         showCancelButton: true,
-        confirmButtonText: '<i class="bi bi-trash me-1"></i> Supprimer',
+        confirmButtonText: '<i class="fa-solid fa-trash me-1"></i> Supprimer',
         cancelButtonText: 'Annuler',
         buttonsStyling: false,
         customClass: {

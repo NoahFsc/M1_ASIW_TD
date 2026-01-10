@@ -9,72 +9,44 @@ const toggleSidebar = () => {
 }
 
 const menuItems = [
-    { to: '/', icon: 'bi-house-door', label: 'Accueil' },
-    { to: '/parcours', icon: 'bi-signpost-2', label: 'Parcours' },
-    { to: '/ues', icon: 'bi-book', label: 'UEs' },
-    { to: '/etudiants', icon: 'bi-people', label: 'Étudiants' },
+    { to: '/', icon: 'fa-house', label: 'Accueil' },
+    { to: '/parcours', icon: 'fa-signs-post', label: 'Parcours' },
+    { to: '/ues', icon: 'fa-book', label: 'UEs' },
+    { to: '/etudiants', icon: 'fa-users', label: 'Étudiants' },
 ]
 </script>
 
 <template>
-    <aside class="sidebar d-flex flex-column flex-shrink-0" :class="{ collapsed: isCollapsed }">
-        <div class="sidebar-header d-flex align-items-center">
-            <i class="bi bi-mortarboard-fill sidebar-logo"></i>
-            <span v-show="!isCollapsed" class="sidebar-title">Université</span>
+    <aside class="bg-primary text-white min-h-screen p-4 flex flex-col shrink-0" :class="isCollapsed ? 'w-18' : 'w-64'">
+        <div class="flex items-center gap-3 py-2" :class="isCollapsed ? 'justify-center' : ''">
+            <i class="fa-solid fa-graduation-cap text-2xl shrink-0"></i>
+            <span v-show="!isCollapsed" class="text-xl font-semibold whitespace-nowrap overflow-hidden">Université</span>
         </div>
 
-        <hr class="sidebar-divider">
+        <hr class="border-white/20 my-3">
 
-        <nav class="sidebar-nav flex-grow-1">
-            <ul class="nav flex-column">
-                <li v-for="item in menuItems" :key="item.to" class="nav-item">
+        <nav class="grow">
+            <ul class="flex flex-col gap-2">
+                <li v-for="item in menuItems" :key="item.to">
                     <RouterLink 
-                        class="nav-link d-flex align-items-center" 
-                        active-class="active" 
+                        class="flex items-center gap-3 p-3 rounded-lg text-white/80 no-underline hover:bg-white/10 hover:text-white" 
+                        active-class="!bg-white/20 !text-white" 
                         :to="item.to"
                         :title="isCollapsed ? item.label : ''"
+                        :class="isCollapsed ? 'justify-center px-2' : ''"
                     >
-                        <i class="bi" :class="item.icon"></i>
-                        <span v-show="!isCollapsed" class="nav-label">{{ item.label }}</span>
+                        <i class="fa-solid text-lg shrink-0 w-6 text-center" :class="item.icon"></i>
+                        <span v-show="!isCollapsed" class="whitespace-nowrap overflow-hidden">{{ item.label }}</span>
                     </RouterLink>
                 </li>
             </ul>
         </nav>
 
-        <hr class="sidebar-divider">
+        <hr class="border-white/20 my-3">
 
-        <button class="toggle-btn d-flex align-items-center" @click="toggleSidebar">
-            <i class="bi" :class="isCollapsed ? 'bi-chevron-right' : 'bi-chevron-left'"></i>
-            <span v-show="!isCollapsed" class="toggle-label">Réduire</span>
+        <button class="flex items-center gap-3 p-3 rounded-lg bg-transparent border-none text-white/80 cursor-pointer hover:bg-white/10 hover:text-white" @click="toggleSidebar" :class="isCollapsed ? 'justify-center' : ''">
+            <i class="fa-solid text-lg shrink-0 w-6 text-center" :class="isCollapsed ? 'fa-chevron-right' : 'fa-chevron-left'"></i>
+            <span v-show="!isCollapsed" class="whitespace-nowrap overflow-hidden">Réduire</span>
         </button>
     </aside>
 </template>
-
-<style scoped>
-/* Sidebar Container */
-.sidebar { background-color: var(--color-primary, #273656); color: white; width: 250px; min-height: 100vh; padding: 1rem; transition: width 0.3s ease; }
-.sidebar.collapsed { width: 70px; }
-
-/* Header */
-.sidebar-header { gap: 0.75rem; padding: 0.5rem 0; }
-.sidebar.collapsed .sidebar-header { justify-content: center; }
-.sidebar-logo { font-size: 1.5rem; flex-shrink: 0; }
-.sidebar-title { font-size: 1.25rem; font-weight: 600; white-space: nowrap; overflow: hidden; }
-.sidebar-divider { border-color: rgba(255, 255, 255, 0.2); margin: 0.75rem 0; }
-
-/* Navigation */
-.sidebar-nav .nav { gap: 0.5rem; }
-.sidebar-nav .nav-link { color: rgba(255, 255, 255, 0.8); padding: 0.75rem; border-radius: 8px; gap: 0.75rem; transition: all 0.2s; text-decoration: none; }
-.sidebar-nav .nav-link:hover { background-color: rgba(255, 255, 255, 0.1); color: white; }
-.sidebar-nav .nav-link.active { background-color: rgba(255, 255, 255, 0.2); color: white; }
-.sidebar-nav .nav-link i { font-size: 1.1rem; flex-shrink: 0; width: 24px; text-align: center; }
-.nav-label { white-space: nowrap; overflow: hidden; }
-.sidebar.collapsed .nav-link { justify-content: center; padding: 0.75rem 0.5rem; }
-
-/* Toggle Button */
-.toggle-btn { background: transparent; border: none; color: rgba(255, 255, 255, 0.8); cursor: pointer; padding: 0.75rem; border-radius: 8px; transition: all 0.2s; gap: 0.75rem; }
-.toggle-btn:hover { background-color: rgba(255, 255, 255, 0.1); color: white; }
-.toggle-btn i { font-size: 1.1rem; flex-shrink: 0; width: 24px; text-align: center; }
-.toggle-label { white-space: nowrap; overflow: hidden; }
-.sidebar.collapsed .toggle-btn { justify-content: center; }
-</style>

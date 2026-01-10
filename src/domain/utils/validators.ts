@@ -1,3 +1,7 @@
+// Utilitaire pour les validations répétitives dans les formulaires
+// Que ce soit pour les UEs, Parcours ou Étudiants
+// -> Au départ elles étaient répétées dans chaque fichier
+
 export const validateRequired = (value: string | null | undefined, fieldName: string): string | null => {
     if (!value || value.trim() === '') {
         return `${fieldName} est requis`;
@@ -28,8 +32,8 @@ export const validateEmail = (email: string | null | undefined): string | null =
 
 export const validateYear = (year: number | null | undefined): string | null => {
     const currentYear = new Date().getFullYear();
-    if (year === null || year === undefined || Number.isNaN(year)) {
-        return 'L\'année de formation est requise';
+    if (year === null || year === undefined || Number.isNaN(year) || year <= 2000) {
+        return 'L\'année de formation est requise et doit être supérieure à 2000';
     }
     if (year > currentYear) {
         return 'L\'année de formation ne doit pas être dans le futur';

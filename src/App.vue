@@ -4,16 +4,10 @@ import Sidebar from './presentation/components/navigation/Sidebar.vue'
 </script>
 
 <template>
-  <main>
-    <div class="application d-flex flex-nowrap">
+  <main class="overflow-x-auto overflow-y-hidden">
+    <div class="flex flex-nowrap w-full h-screen">
       <Sidebar />
-      <RouterView class="content" />
+      <RouterView class="h-screen grow overflow-y-auto" />
     </div>
   </main>
 </template>
-
-<style scoped>
-main { overflow-x: auto; overflow-y: hidden; }
-main .application { width: 100%; height: 100vh; }
-.content { height: 100vh; flex-grow: 1; overflow-y: auto; }
-</style>

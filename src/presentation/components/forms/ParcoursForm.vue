@@ -50,6 +50,7 @@ const saveParcours = async () => {
       await ParcoursDAO.getInstance().update(currentParcours.value.ID, currentParcours.value);
       Toast.success('Parcours mis à jour avec succès');
       emit('update:parcours', JSON.parse(JSON.stringify(toRaw(currentParcours.value))));
+      // Ce JSON.parse/JSON.stringify est utilisé pour cloner l'objet du front car les mises à jour renvoient une 204 No Content dans mon API
     } else { 
       const newParcours = await ParcoursDAO.getInstance().create(currentParcours.value);
       Toast.success('Parcours créé avec succès');
@@ -89,7 +90,7 @@ watch(() => currentParcours.value.AnneeFormation, () => {
     </template>
 
     <template v-slot:body> 
-      <form class="form-modern" @submit.prevent="saveParcours">
+      <form class="flex flex-col gap-4" @submit.prevent="saveParcours">
         <CustomInput 
           v-model="currentParcours.NomParcours" 
           id="intitule" 
@@ -108,7 +109,7 @@ watch(() => currentParcours.value.AnneeFormation, () => {
           :error="formErrors.AnneeFormation"
         />
 
-        <div class="form-actions">
+        <div class="flex gap-3 justify-end mt-2">
           <CustomButton variant="cancel" @click="closeForm">Annuler</CustomButton>
           <CustomButton variant="submit">Enregistrer</CustomButton>
         </div>

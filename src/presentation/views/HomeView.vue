@@ -17,6 +17,7 @@ import {
 import BarChart from '@/presentation/components/charts/BarChart.vue';
 import DoughnutChart from '@/presentation/components/charts/DoughnutChart.vue';
 import HorizontalBarChart from '@/presentation/components/charts/HorizontalBarChart.vue';
+import StatCard from '@/presentation/components/common/StatCard.vue';
 import { Toast } from '@/services/ToastService';
 
 const loading = ref(true);
@@ -27,6 +28,9 @@ const topUes = ref<TopUes>({ labels: [], data: [] });
 
 const hasNotes = computed(() => notesDistribution.value.data.reduce((sum, val) => sum + val, 0) > 0);
 
+/**
+ * Charge toutes les données nécessaires au tableau de bord
+ */
 onMounted(async () => {
     try {
         const [parcours, ues, etudiants, notes] = await Promise.all([
@@ -49,66 +53,58 @@ onMounted(async () => {
 </script>
 
 <template>
-    <div class="page-container">
-        <div class="page-header">
+    <div class="p-8 max-w-7xl mx-auto">
+        <div class="flex justify-between items-start mb-8">
             <div>
-                <h1 class="page-title">Tableau de bord</h1>
-                <p class="page-subtitle">Vue d'ensemble de votre université</p>
+                <h1 class="text-3xl font-bold text-gray-900">Tableau de bord</h1>
+                <p class="text-gray-600 mt-1">Vue d'ensemble de votre université</p>
             </div>
         </div>
 
-        <div v-if="loading" class="loading">Chargement du dashboard...</div>
+        <div v-if="loading" class="text-center py-12 text-gray-500">Chargement du dashboard...</div>
 
-        <div v-else class="dashboard-container">
-            <div class="kpi-cards">
-                <div class="kpi-card">
-                    <div class="kpi-icon" style="background: #eff6ff; color: #3b82f6;">
-                        <i class="bi bi-signpost-2"></i>
-                    </div>
-                    <div class="kpi-content">
-                        <div class="kpi-value">{{ stats.totalParcours }}</div>
-                        <div class="kpi-label">Parcours</div>
-                    </div>
-                </div>
+        <div v-else class="flex flex-col gap-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+                <StatCard 
+                    icon="fa-signs-post"
+                    icon-color="text-blue-500"
+                    icon-bg-color="bg-blue-50"
+                    :value="stats.totalParcours"
+                    label="Parcours"
+                />
 
-                <div class="kpi-card">
-                    <div class="kpi-icon" style="background: #f0fdf4; color: #10b981;">
-                        <i class="bi bi-book"></i>
-                    </div>
-                    <div class="kpi-content">
-                        <div class="kpi-value">{{ stats.totalUes }}</div>
-                        <div class="kpi-label">Unités d'Enseignement</div>
-                    </div>
-                </div>
+                <StatCard 
+                    icon="fa-book"
+                    icon-color="text-green-500"
+                    icon-bg-color="bg-green-50"
+                    :value="stats.totalUes"
+                    label="Unités d'Enseignement"
+                />
 
-                <div class="kpi-card">
-                    <div class="kpi-icon" style="background: #fef3c7; color: #f59e0b;">
-                        <i class="bi bi-people"></i>
-                    </div>
-                    <div class="kpi-content">
-                        <div class="kpi-value">{{ stats.totalEtudiants }}</div>
-                        <div class="kpi-label">Étudiants</div>
-                    </div>
-                </div>
+                <StatCard 
+                    icon="fa-users"
+                    icon-color="text-amber-500"
+                    icon-bg-color="bg-amber-50"
+                    :value="stats.totalEtudiants"
+                    label="Étudiants"
+                />
 
-                <div class="kpi-card">
-                    <div class="kpi-icon" style="background: #fce7f3; color: #ec4899;">
-                        <i class="bi bi-graph-up"></i>
-                    </div>
-                    <div class="kpi-content">
-                        <div class="kpi-value">{{ stats.moyenneGenerale || 'N/A' }}</div>
-                        <div class="kpi-label">Moyenne générale</div>
-                    </div>
-                </div>
+                <StatCard 
+                    icon="fa-chart-line"
+                    icon-color="text-pink-500"
+                    icon-bg-color="bg-pink-50"
+                    :value="stats.moyenneGenerale || 'N/A'"
+                    label="Moyenne générale"
+                />
             </div>
 
-            <div class="charts-grid" v-if="hasNotes">
-                <div class="chart-card">
-                    <div class="chart-header">
-                        <i class="bi bi-bar-chart"></i>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start" v-if="hasNotes">
+                <div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
+                    <div class="flex items-center gap-3 px-5 py-4 bg-gray-50 border-b border-gray-200 font-semibold text-gray-900">
+                        <i class="fa-solid fa-chart-column"></i>
                         Répartition des étudiants par parcours
                     </div>
-                    <div class="chart-body">
+                    <div class="p-6">
                         <BarChart 
                             :labels="parcoursDistribution.labels"
                             :data="parcoursDistribution.data"
@@ -117,12 +113,12 @@ onMounted(async () => {
                     </div>
                 </div>
 
-                <div class="chart-card">
-                    <div class="chart-header">
-                        <i class="bi bi-pie-chart"></i>
+                <div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
+                    <div class="flex items-center gap-3 px-5 py-4 bg-gray-50 border-b border-gray-200 font-semibold text-gray-900">
+                        <i class="fa-solid fa-chart-pie"></i>
                         Distribution des notes
                     </div>
-                    <div class="chart-body">
+                    <div class="p-6">
                         <DoughnutChart 
                             :labels="notesDistribution.labels"
                             :data="notesDistribution.data"
@@ -132,12 +128,12 @@ onMounted(async () => {
                     </div>
                 </div>
 
-                <div class="chart-card chart-card-wide">
-                    <div class="chart-header">
-                        <i class="bi bi-trophy"></i>
+                <div class="bg-white border border-gray-200 rounded-xl overflow-hidden lg:col-span-2">
+                    <div class="flex items-center gap-3 px-5 py-4 bg-gray-50 border-b border-gray-200 font-semibold text-gray-900">
+                        <i class="fa-solid fa-trophy"></i>
                         Top 5 des UEs les plus notées
                     </div>
-                    <div class="chart-body">
+                    <div class="p-6">
                         <HorizontalBarChart 
                             :labels="topUes.labels"
                             :data="topUes.data"
@@ -148,91 +144,10 @@ onMounted(async () => {
             </div>
 
             <div v-else class="empty-state">
-                <i class="bi bi-clipboard-data"></i>
+                <i class="fa-solid fa-clipboard"></i>
                 <p>Aucune donnée statistique disponible pour le moment.</p>
-                <p style="font-size: 0.9rem; margin-top: 0.5rem;">Commencez par ajouter des notes aux étudiants.</p>
+                <p class="text-sm mt-2">Commencez par ajouter des notes aux étudiants.</p>
             </div>
         </div>
     </div>
 </template>
-
-<style scoped>
-.dashboard-container { display: flex; flex-direction: column; gap: 2rem; }
-
-.kpi-cards { 
-    display: grid; 
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); 
-    gap: 1.25rem; 
-}
-
-.kpi-card {
-    background: white; 
-    border: 1px solid var(--color-border); 
-    border-radius: var(--radius-xl); 
-    padding: 1.5rem; 
-    display: flex; 
-    align-items: center; 
-    gap: 1.25rem;
-    transition: var(--transition);
-}
-.kpi-card:hover { 
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); 
-    transform: translateY(-2px); 
-}
-
-.kpi-icon {
-    width: 60px; 
-    height: 60px; 
-    border-radius: var(--radius-lg); 
-    display: flex; 
-    align-items: center; 
-    justify-content: center; 
-    font-size: 1.75rem;
-    flex-shrink: 0;
-}
-
-.kpi-content { flex: 1; }
-.kpi-value { 
-    font-size: 2rem; 
-    font-weight: 700; 
-    color: var(--color-text-dark); 
-    line-height: 1; 
-}
-.kpi-label { 
-    font-size: 0.9rem; 
-    color: var(--color-text-light); 
-    margin-top: 0.5rem; 
-}
-
-.charts-grid {
-    display: grid; 
-    grid-template-columns: repeat(2, 1fr); 
-    gap: 1.5rem;
-}
-
-.chart-card {
-    background: white; 
-    border: 1px solid var(--color-border); 
-    border-radius: var(--radius-xl); 
-    overflow: hidden;
-}
-.chart-card-wide { grid-column: 1 / -1; }
-
-.chart-header {
-    display: flex; 
-    align-items: center; 
-    gap: 0.75rem; 
-    padding: 1.25rem; 
-    background: var(--color-bg-light); 
-    border-bottom: 1px solid var(--color-border); 
-    font-weight: 600; 
-    color: var(--color-text-dark);
-}
-
-.chart-body { padding: 1.5rem; }
-
-@media (max-width: 768px) {
-    .charts-grid { grid-template-columns: 1fr; }
-    .chart-card-wide { grid-column: 1; }
-}
-</style>

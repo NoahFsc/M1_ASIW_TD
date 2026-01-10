@@ -2,6 +2,9 @@ import type { Note } from '../entities/Note';
 import apiClient from '../config/axiosConfig';
 import { getErrorMessage } from '../utils/errorHelper';
 
+/**
+ * DAO pour les notes d'étudiants
+ */
 export class NoteDAO {
     private static instance: NoteDAO;
     
@@ -14,6 +17,11 @@ export class NoteDAO {
         return NoteDAO.instance;
     }
 
+    /**
+     * Récupère toutes les notes depuis l'API
+     * @returns Liste complète de toutes les notes
+     * @throws Error si la récupération échoue
+     */
     public async list(): Promise<Note[]> {
         try {
             const response = await apiClient.get('/api/note');
@@ -23,6 +31,13 @@ export class NoteDAO {
         }
     }
 
+    /**
+     * Récupère toutes les notes d'une UE spécifique
+     * Utilisé pour afficher les notes dans la page de détail UE
+     * @param ueId Identifiant de l'UE
+     * @returns Liste des notes pour cette UE
+     * @throws Error si la récupération échoue
+     */
     public async listByUe(ueId: number): Promise<Note[]> {
         try {
             const response = await apiClient.get(`/api/note/ue/${ueId}`);
@@ -32,6 +47,12 @@ export class NoteDAO {
         }
     }
 
+    /**
+     * Crée une nouvelle note dans la base
+     * @param data Objet contenant EtudiantId, UeId et Valeur
+     * @returns La note créée
+     * @throws Error si la création échoue (notamment si note existe déjà)
+     */
     public async create(data: { EtudiantId: number; UeId: number; Valeur: number }): Promise<Note> {
         try {
             const response = await apiClient.post('/api/note', data);
@@ -41,6 +62,14 @@ export class NoteDAO {
         }
     }
 
+    /**
+     * Met à jour une note existante
+     * @param etudiantId Identifiant de l'étudiant
+     * @param ueId Identifiant de l'UE
+     * @param valeur Nouvelle valeur de la note
+     * @returns La note mise à jour
+     * @throws Error si la mise à jour échoue
+     */
     public async update(etudiantId: number, ueId: number, valeur: number): Promise<Note> {
         try {
             const response = await apiClient.put(`/api/note/${etudiantId}/ue/${ueId}`, { Valeur: valeur });
@@ -50,6 +79,12 @@ export class NoteDAO {
         }
     }
 
+    /**
+     * Supprime une note de la base
+     * @param etudiantId Identifiant de l'étudiant
+     * @param ueId Identifiant de l'UE
+     * @throws Error si la suppression échoue
+     */
     public async delete(etudiantId: number, ueId: number): Promise<void> {
         try {
             await apiClient.delete(`/api/note/${etudiantId}/ue/${ueId}`);

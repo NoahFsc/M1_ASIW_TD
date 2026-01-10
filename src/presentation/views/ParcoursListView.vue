@@ -3,6 +3,7 @@ import { onMounted, ref, computed } from 'vue';
 import { Toast } from '@/services/ToastService';
 import ParcoursForm from '@/presentation/components/forms/ParcoursForm.vue';
 import SearchBar from '@/presentation/components/common/SearchBar.vue';
+import ActionButtons, { type ActionButton } from '@/presentation/components/common/ActionButtons.vue';
 import { Parcours } from '@/domain/entities/Parcours';
 import { ParcoursDAO } from '@/domain/daos/ParcoursDAO';
 
@@ -66,47 +67,43 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="page-container">
-        <div class="page-header">
+    <div class="p-8 max-w-7xl mx-auto">
+        <div class="flex justify-between items-start mb-8">
             <div>
-                <h1 class="page-title">Parcours</h1>
-                <p class="page-subtitle">Gérez les parcours de formation</p>
+                <h1 class="text-3xl font-bold text-gray-900">Parcours</h1>
+                <p class="text-gray-600 mt-1">Gérez les parcours de formation</p>
             </div>
-            <button class="btn-add" @click="() => parcoursForm?.openForm()">
-                <i class="bi bi-plus-lg"></i>
+            <button class="bg-primary hover:bg-primary-hover px-5 py-2.5 text-white rounded-lg font-medium flex items-center gap-2 cursor-pointer" @click="() => parcoursForm?.openForm()">
+                <i class="fa-solid fa-plus"></i>
                 Nouveau parcours
             </button>
         </div>
 
         <SearchBar v-model="searchQuery" placeholder="Rechercher un parcours..." />
 
-        <div class="table-container">
-            <table class="modern-table">
+        <div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
+            <table class="w-full">
                 <thead>
-                    <tr>
-                        <th v-for="col in columns" :key="col.field" :style="col.style">
+                    <tr class="bg-gray-50 border-b border-gray-200">
+                        <th v-for="col in columns" :key="col.field" :style="col.style" class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wide">
                             {{ col.label }}
                         </th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody class="divide-y divide-gray-100">
                     <tr v-if="filteredParcours.length === 0">
-                        <td :colspan="columns.length" class="empty-state">
-                            <i class="bi bi-inbox"></i>
-                            <p>Aucun parcours trouvé</p>
+                        <td :colspan="columns.length" class="text-center py-12">
+                            <i class="fa-solid fa-inbox text-4xl text-gray-300"></i>
+                            <p class="text-gray-500 mt-2">Aucun parcours trouvé</p>
                         </td>
                     </tr>
-                    <tr v-for="p in filteredParcours" :key="p.ID!">
-                        <td v-for="col in columns" :key="col.field" :style="col.style">
+                    <tr v-for="p in filteredParcours" :key="p.ID!" class="hover:bg-gray-50">
+                        <td v-for="col in columns" :key="col.field" :style="col.style" class="px-4 py-3 text-sm text-gray-700">
                             <template v-if="col.field === 'Actions'">
-                                <div class="actions">
-                                    <button class="action-btn edit" @click="parcoursForm?.openForm(p)">
-                                        <i class="bi bi-pencil"></i>
-                                    </button>
-                                    <button class="action-btn delete" @click="onDeleteParcours(p)">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                </div>
+                                <ActionButtons :actions="[
+                                    { type: 'edit', onClick: () => parcoursForm?.openForm(p) },
+                                    { type: 'delete', onClick: () => onDeleteParcours(p) }
+                                ]" />
                             </template>
                             <template v-else>
                                 {{ getCellValue(p, col.field) }}

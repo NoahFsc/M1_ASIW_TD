@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router';
 import { Toast } from '@/services/ToastService';
 import UeForm from '@/presentation/components/forms/UeForm.vue';
 import SearchBar from '@/presentation/components/common/SearchBar.vue';
+import ActionButtons, { type ActionButton } from '@/presentation/components/common/ActionButtons.vue';
 import { Ue } from '@/domain/entities/Ue';
 import { UeDAO } from '@/domain/daos/UeDAO';
 import { Parcours } from '@/domain/entities/Parcours';
@@ -90,51 +91,47 @@ onMounted(async () => {
 </script>
 
 <template>
-    <div class="page-container">
-        <div class="page-header">
+    <div class="p-8 max-w-7xl mx-auto">
+        <div class="flex justify-between items-start mb-8">
             <div>
-                <h1 class="page-title">Unités d'Enseignement</h1>
-                <p class="page-subtitle">Gérez les UEs de formation</p>
+                <h1 class="text-3xl font-bold text-gray-900">Unités d'Enseignement</h1>
+                <p class="text-gray-600 mt-1">Gérez les UEs de formation</p>
             </div>
-            <button class="btn-add" @click="() => ueForm?.openForm()">
-                <i class="bi bi-plus-lg"></i>
+            <button class="bg-primary hover:bg-primary-hover px-5 py-2.5 text-white rounded-lg font-medium flex items-center gap-2 cursor-pointer" @click="() => ueForm?.openForm()">
+                <i class="fa-solid fa-plus"></i>
                 Nouvelle UE
             </button>
         </div>
 
         <SearchBar v-model="searchQuery" placeholder="Rechercher une UE..." />
 
-        <div class="table-container">
-            <table class="modern-table">
+        <div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
+            <table class="w-full">
                 <thead>
-                    <tr>
-                        <th v-for="col in columns" :key="col.field" :style="col.style">
+                    <tr class="bg-gray-50 border-b border-gray-200">
+                        <th v-for="col in columns" :key="col.field" :style="col.style" class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wide">
                             {{ col.label }}
                         </th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody class="divide-y divide-gray-100">
                     <tr v-if="filteredUes.length === 0">
-                        <td :colspan="columns.length" class="empty-state">
-                            <i class="bi bi-inbox"></i>
-                            <p>Aucune UE trouvée</p>
+                        <td :colspan="columns.length" class="text-center py-12">
+                            <i class="fa-solid fa-inbox text-4xl text-gray-300"></i>
+                            <p class="text-gray-500 mt-2">Aucune UE trouvée</p>
                         </td>
                     </tr>
-                    <tr v-for="ue in filteredUes" :key="ue.ID!">
-                        <td v-for="col in columns" :key="col.field" :style="col.style">
+                    <tr v-for="ue in filteredUes" :key="ue.ID!" class="hover:bg-gray-50">
+                        <td v-for="col in columns" :key="col.field" :style="col.style" class="px-4 py-3 text-sm text-gray-700">
                             <template v-if="col.field === 'Actions'">
-                                <div class="actions">
-                                    <button class="action-btn edit" @click="goToUeDetail(ue)">
-                                        <i class="bi bi-pencil"></i>
-                                    </button>
-                                    <button class="action-btn delete" @click="onDeleteUe(ue)">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                </div>
+                                <ActionButtons :actions="[
+                                    { type: 'view', onClick: () => goToUeDetail(ue) },
+                                    { type: 'delete', onClick: () => onDeleteUe(ue) }
+                                ]" />
                             </template>
                             <template v-else-if="col.field === 'Parcours'">
-                                <div class="parcours-pills">
-                                    <span v-for="parcours in getParcoursList(ue)" :key="parcours" class="badge">
+                                <div class="flex flex-wrap gap-1">
+                                    <span v-for="parcours in getParcoursList(ue)" :key="parcours" class="inline-block px-2.5 py-1 bg-blue-50 text-blue-700 rounded-md text-xs font-medium">
                                         {{ parcours }}
                                     </span>
                                     <span v-if="getParcoursList(ue).length === 0">-</span>
@@ -153,6 +150,3 @@ onMounted(async () => {
     </div>
 </template>
 
-<style scoped>
-.parcours-pills { display: flex; flex-wrap: wrap; gap: 0.25rem; }
-</style>
